@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#FFF7F0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>My Calm Place</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   MY CALM PLACE — v1
+   Single-file app for Zipporah. index.html + /art (later).
+   Rename app/character/currency/PIN in the Parent tab > Settings,
+   or in the CONFIG block at the bottom of this file.
+   ART SLOTS are marked with  <!-- ART: ... -->  through the file.
+   ============================================================ */
+:root{
+  --cream:#FFF7F0; --cream-2:#FFEFE2; --ink:#4A3F3A; --ink-soft:#8A7B72;
+  --peach:#FF8E6B; --peach-d:#F4714A; --sky:#7FB2E8; --sky-d:#5B8FD6;
+  --honey:#F6B656; --honey-d:#E89B33; --mint:#7FCB93; --mint-d:#54B071;
+  --gold:#FFC94D; --line:#F0DFD0; --card:#FFFFFF;
+  --twilight-1:#5C5A9E; --twilight-2:#3C3A6B; --twilight-3:#26264B;
+  --c-blue:#5B8FD6; --c-yellow:#FFC94D; --c-red:#FF6B6B; --c-green:#5FBF77; --c-purple:#A77BD6;
+  --r:26px; --shadow:0 14px 30px rgba(120,80,60,.14);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;height:100%;}
+body{
+  font-family:'Nunito',system-ui,sans-serif; color:var(--ink);
+  background:var(--cream);
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+  position:fixed; inset:0;
+}
+h1,h2,h3,.display{font-family:'Baloo 2',sans-serif; margin:0; line-height:1.05;}
+button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+.app{height:100%; width:100%; max-width:560px; margin:0 auto; position:relative; overflow:hidden;}
+
+/* ---------- screens ---------- */
+.screen{position:absolute; inset:0; display:none; flex-direction:column;
+  padding:max(18px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));
+  overflow-y:auto; animation:fade .35s ease;}
+.screen.active{display:flex;}
+@keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+
+/* ---------- shared bits ---------- */
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
+.dots{display:flex; gap:8px;}
+.dot{width:11px; height:11px; border-radius:50%; background:var(--line);}
+.dot.on{background:var(--peach);}
+.dot.done{background:var(--mint);}
+.starpill{display:inline-flex; align-items:center; gap:6px; background:#fff; border:2px solid var(--line);
+  padding:6px 13px; border-radius:999px; font-weight:800; box-shadow:var(--shadow); font-size:17px;}
+.iconbtn{width:46px; height:46px; border-radius:50%; background:#fff; border:2px solid var(--line);
+  font-size:21px; display:grid; place-items:center; box-shadow:var(--shadow);}
+
+.buddy{display:flex; align-items:flex-start; gap:12px; margin:6px 0 14px;}
+.buddy .face{flex:0 0 auto;}
+.bubble{background:#fff; border:3px solid var(--line); border-radius:20px 20px 20px 6px;
+  padding:13px 16px; font-weight:700; font-size:20px; box-shadow:var(--shadow); position:relative;}
+.prompt-big{font-size:30px; text-align:center; margin:4px 0 14px; font-weight:800;}
+
+.center{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;}
+.cta{display:block; width:100%; background:linear-gradient(180deg,var(--peach),var(--peach-d));
+  color:#fff; font-family:'Baloo 2'; font-weight:700; font-size:25px; padding:18px; border-radius:22px;
+  box-shadow:0 10px 0 rgba(0,0,0,.08), var(--shadow); transition:transform .08s;}
+.cta:active{transform:translateY(3px);}
+.cta.ghost{background:#fff; color:var(--ink); border:3px solid var(--line); box-shadow:var(--shadow);}
+.cta.sky{background:linear-gradient(180deg,var(--sky),var(--sky-d));}
+.cta.mint{background:linear-gradient(180deg,var(--mint),var(--mint-d));}
+.cta.small{font-size:20px; padding:14px; width:auto; padding-left:26px; padding-right:26px;}
+.row{display:flex; gap:12px; width:100%;}
+
+/* ---------- HOME ---------- */
+#home{justify-content:space-between;}
+.hero{text-align:center; padding-top:14px;}
+.hero h1{font-size:42px; color:var(--peach-d); letter-spacing:.5px;}
+.hero p{color:var(--ink-soft); font-weight:700; margin-top:4px; font-size:18px;}
+.buddy-big{margin:14px auto; filter:drop-shadow(0 12px 16px rgba(120,80,60,.18));}
+.doors{display:flex; flex-direction:column; gap:16px;}
+.door{display:flex; align-items:center; gap:16px; padding:22px; border-radius:var(--r); color:#fff;
+  box-shadow:0 12px 0 rgba(0,0,0,.07), var(--shadow); transition:transform .08s; text-align:left;}
+.door:active{transform:translateY(3px);}
+.door .em{font-size:46px; flex:0 0 auto;}
+.door .lbl{font-family:'Baloo 2'; font-weight:700; font-size:27px; line-height:1.05;}
+.door .sub{font-weight:700; opacity:.92; font-size:15px;}
+.door.calm{background:linear-gradient(135deg,#8FC0EE,#5B8FD6);}
+.door.trouble{background:linear-gradient(135deg,#F8C66E,#E89B33);}
+.homefoot{display:flex; align-items:center; justify-content:space-between; padding-top:6px;}
+
+/* ---------- COLORS GAME ---------- */
+.scene{width:100%; border-radius:24px; overflow:hidden; box-shadow:var(--shadow); border:4px solid #fff; background:#cfe9ff;}
+.scene svg{display:block; width:100%; height:auto;}
+.findable{cursor:pointer; transition:transform .12s;}
+.findable:active{transform:scale(.94);}
+.tray{display:flex; gap:12px; justify-content:center; margin-top:16px;}
+.swatch{width:52px; height:52px; border-radius:16px; display:grid; place-items:center; font-size:26px;
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.12); border:3px solid #fff; position:relative; opacity:.45; transform:scale(.92);
+  transition:all .25s;}
+.swatch.target{opacity:1; transform:scale(1.08); animation:pulse 1.1s infinite;}
+.swatch.found{opacity:1; transform:scale(1);}
+@keyframes pulse{0%,100%{box-shadow:inset 0 -4px 0 rgba(0,0,0,.12), 0 0 0 0 rgba(255,255,255,.9);}50%{box-shadow:inset 0 -4px 0 rgba(0,0,0,.12), 0 0 0 8px rgba(255,255,255,0);}}
+.wiggle{animation:wig .4s;}
+@keyframes wig{0%,100%{transform:none;}25%{transform:rotate(-7deg);}75%{transform:rotate(7deg);}}
+
+/* ---------- SMELL / DRAW ---------- */
+.chips{display:flex; flex-wrap:wrap; gap:10px; justify-content:center;}
+.chip{background:#fff; border:3px solid var(--line); border-radius:18px; padding:12px 16px; font-weight:800; font-size:18px; box-shadow:var(--shadow);}
+.chip.on{background:var(--honey); color:#fff; border-color:var(--honey-d);}
+.canvaswrap{width:100%; background:#fff; border:4px solid var(--line); border-radius:22px; box-shadow:var(--shadow); position:relative; touch-action:none;}
+#drawpad{display:block; width:100%; height:230px; border-radius:18px;}
+.canvas-clear{position:absolute; top:10px; right:10px; background:#fff; border:2px solid var(--line); border-radius:14px; padding:7px 12px; font-weight:800; font-size:14px; box-shadow:var(--shadow);}
+
+/* ---------- COUNTDOWN ---------- */
+.bignum{font-family:'Baloo 2'; font-weight:800; font-size:150px; color:var(--sky-d); line-height:1;
+  width:230px; height:230px; border-radius:50%; display:grid; place-items:center;
+  background:radial-gradient(circle at 50% 35%,#fff,#eaf3ff); box-shadow:var(--shadow); border:6px solid #fff;}
+.bignum.tap:active{transform:scale(.95);}
+.hint{color:var(--ink-soft); font-weight:800; font-size:18px;}
+
+/* ---------- BREATHS (signature) ---------- */
+#breaths{background:linear-gradient(180deg,var(--twilight-1),var(--twilight-2) 55%,var(--twilight-3)); }
+#breaths .topbar .iconbtn,#breaths .starpill{background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25); color:#fff;}
+.orbwrap{flex:1; display:grid; place-items:center; position:relative;}
+.orb{width:150px; height:150px; border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#fff,#ffe6b3 45%,#ffb65f 100%);
+  box-shadow:0 0 60px 20px rgba(255,200,120,.45), 0 0 140px 60px rgba(255,180,120,.25);
+  transition:transform 4s cubic-bezier(.4,0,.4,1); transform:scale(.7);}
+.orb.in{transform:scale(1.55); transition-duration:4s;}
+.orb.out{transform:scale(.7); transition-duration:6s;}
+.orb-word{position:absolute; font-family:'Baloo 2'; font-weight:800; font-size:46px; color:#fff;
+  text-shadow:0 2px 18px rgba(0,0,0,.25); letter-spacing:3px; transition:opacity .6s;}
+.breath-label{color:#fff; font-weight:800; font-size:24px; text-align:center; opacity:.95;}
+.breath-count{color:rgba(255,255,255,.8); font-weight:800; font-size:17px; text-align:center; letter-spacing:1px;}
+#breaths .cta.ghost{background:rgba(255,255,255,.14); color:#fff; border-color:rgba(255,255,255,.3);}
+
+/* ---------- PICK GRIDS (behaviors / feelings) ---------- */
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:13px; width:100%;}
+.pick{background:#fff; border:3px solid var(--line); border-radius:22px; padding:16px 6px 12px; text-align:center; box-shadow:var(--shadow); transition:transform .08s;}
+.pick:active{transform:scale(.96);}
+.pick .em{font-size:40px; display:block;}
+.pick .t{font-weight:800; font-size:15px; margin-top:6px; display:block;}
+.pick.on{border-color:var(--peach); background:#FFF1EA;}
+.pick.on::after{content:"✓"; position:absolute; }
+
+/* ---------- CARDS (consequences / steps) ---------- */
+.card{background:#fff; border:3px solid var(--line); border-radius:22px; padding:18px; box-shadow:var(--shadow); width:100%; text-align:left;}
+.choice{display:flex; align-items:center; gap:14px; margin-bottom:14px; transition:transform .08s;}
+.choice:active{transform:scale(.98);}
+.choice .em{font-size:38px;}
+.choice .ti{font-family:'Baloo 2'; font-weight:700; font-size:22px;}
+.choice .de{color:var(--ink-soft); font-weight:700; font-size:15px;}
+.path{display:flex; flex-direction:column; gap:12px; width:100%;}
+.step{display:flex; align-items:center; gap:14px; padding:16px; border-radius:20px; background:#fff; border:3px solid var(--line); box-shadow:var(--shadow);}
+.step.done{border-color:var(--mint); background:#F1FBF3;}
+.step.active{border-color:var(--peach); background:#FFF1EA;}
+.step.locked{opacity:.5;}
+.step .num{width:40px;height:40px;border-radius:50%;background:var(--cream-2);display:grid;place-items:center;font-family:'Baloo 2';font-weight:800;font-size:20px;flex:0 0 auto;}
+.step.done .num{background:var(--mint); color:#fff;}
+.step .gr{flex:1;}
+.step .gr .t{font-weight:800; font-size:18px;}
+.step .gr .s{color:var(--ink-soft); font-weight:700; font-size:14px;}
+
+/* story pager */
+.page{width:100%; background:#fff; border:4px solid #fff; border-radius:24px; overflow:hidden; box-shadow:var(--shadow);}
+.page .pic{height:230px; background:linear-gradient(135deg,#FFE3C7,#FFD0A6); display:grid; place-items:center; font-size:80px;}
+.page .txt{padding:18px; font-weight:700; font-size:20px; line-height:1.4;}
+.pagenav{display:flex; justify-content:center; gap:8px; margin-top:14px;}
+.pagenav .pd{width:9px;height:9px;border-radius:50%;background:var(--line);}
+.pagenav .pd.on{background:var(--peach);}
+
+/* mini chat */
+.chatlog{width:100%; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:4px;}
+.msg{max-width:85%; padding:12px 15px; border-radius:18px; font-weight:700; font-size:18px; line-height:1.35;}
+.msg.b{background:#fff; border:3px solid var(--line); border-bottom-left-radius:6px; align-self:flex-start; box-shadow:var(--shadow);}
+.msg.me{background:var(--sky); color:#fff; border-bottom-right-radius:6px; align-self:flex-end;}
+.replies{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+
+/* ---------- PARENT ---------- */
+#parent .ptop{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.ptabs{display:flex; gap:8px; margin-bottom:14px;}
+.ptab{flex:1; padding:11px; border-radius:14px; background:#fff; border:2px solid var(--line); font-weight:800; font-size:15px;}
+.ptab.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+.field{margin-bottom:14px;}
+.field label{display:block; font-weight:800; font-size:14px; color:var(--ink-soft); margin-bottom:6px;}
+.field input{width:100%; padding:13px; border-radius:14px; border:2px solid var(--line); font-family:inherit; font-size:17px; font-weight:700;}
+.pend{display:flex; align-items:center; gap:12px; background:#fff; border:2px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px;}
+.pend .ok{margin-left:auto; background:var(--mint); color:#fff; border-radius:12px; padding:10px 16px; font-weight:800;}
+.empty{text-align:center; color:var(--ink-soft); font-weight:700; padding:30px; font-size:16px;}
+.pinpad{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:280px; margin:18px auto;}
+.pinpad button{background:#fff; border:2px solid var(--line); border-radius:18px; padding:18px; font-family:'Baloo 2'; font-weight:700; font-size:26px; box-shadow:var(--shadow);}
+.pindots{display:flex; gap:14px; justify-content:center; margin:10px 0;}
+.pindots i{width:16px;height:16px;border-radius:50%;background:var(--line);}
+.pindots i.f{background:var(--ink);}
+
+.celebrate .em{font-size:90px; animation:pop .5s;}
+@keyframes pop{from{transform:scale(0);}to{transform:scale(1);}}
+.muted{color:var(--ink-soft); font-weight:700; font-size:14px; text-align:center;}
+.note{background:#FFF6E8; border:2px dashed var(--honey); border-radius:16px; padding:12px 14px; font-weight:700; font-size:14px; color:#9a6b1e;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ===================== HOME ===================== -->
+  <section class="screen active" id="home">
+    <div class="topbar"><span></span><span class="starpill" id="homeStars">⭐ 0</span></div>
+    <div class="hero">
+      <h1 id="appTitle">My Calm Place</h1>
+      <p>Hi, let's feel better together</p>
+      <!-- ART: drop her character here (replace this SVG buddy) -->
+      <div class="buddy-big" id="homeBuddy"></div>
+    </div>
+    <div class="doors">
+      <button class="door calm" onclick="startFlow('calm')">
+        <span class="em">☁️</span>
+        <span><span class="lbl">I need to calm down</span><br><span class="sub">Let's breathe and feel better</span></span>
+      </button>
+      <button class="door trouble" onclick="startFlow('trouble')">
+        <span class="em">🤍</span>
+        <span><span class="lbl">I got in trouble</span><br><span class="sub">Let's make it right</span></span>
+      </button>
+    </div>
+    <div class="homefoot">
+      <span class="muted">v1 · made with love</span>
+      <button class="iconbtn" onclick="openParent()" title="Parents">⚙️</button>
+    </div>
+  </section>
+
+  <!-- ===================== COLORS ===================== -->
+  <section class="screen" id="colors">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_colors"></div><span style="width:46px"></span></div>
+    <div class="buddy"><span class="face" id="f_colors"></span><div class="bubble" id="colorPrompt">Can you find something <b style="color:var(--c-blue)">blue</b>?</div></div>
+    <div class="scene" id="scene"><!-- ART: replace this SVG with your 50 scene images + tap regions --></div>
+    <div class="tray" id="tray"></div>
+  </section>
+
+  <!-- ===================== SMELL + DRAW ===================== -->
+  <section class="screen" id="smell">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_smell"></div><span style="width:46px"></span></div>
+    <div class="buddy"><span class="face" id="f_smell"></span><div class="bubble">What do you smell? Tap one, or draw it with your finger!</div></div>
+    <div class="chips" id="smellChips" style="margin-bottom:14px"></div>
+    <div class="canvaswrap"><button class="canvas-clear" onclick="clearPad()">Clear</button><canvas id="drawpad"></canvas></div>
+    <button class="cta mint" style="margin-top:16px" onclick="next()">All done ▸</button>
+  </section>
+
+  <!-- ===================== COUNTDOWN ===================== -->
+  <section class="screen" id="count">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_count"></div><span style="width:46px"></span></div>
+    <div class="buddy"><span class="face" id="f_count"></span><div class="bubble">Let's count down from ten. Tap the number with me!</div></div>
+    <div class="center">
+      <button class="bignum tap" id="bignum" onclick="tapCount()">10</button>
+      <div class="hint" id="countHint">Tap me! 👆</div>
+    </div>
+  </section>
+
+  <!-- ===================== BREATHS (signature) ===================== -->
+  <section class="screen" id="breaths">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_breaths"></div><span style="width:46px"></span></div>
+    <div class="orbwrap">
+      <div class="orb" id="orb"><div class="orb-word" id="orbWord"></div></div>
+    </div>
+    <div class="breath-label" id="breathLabel">Yahweh breaths</div>
+    <div class="breath-count" id="breathCount">5 slow breaths</div>
+    <button class="cta ghost" id="breathBtn" style="margin-top:18px" onclick="startBreaths()">I'm ready ▸</button>
+  </section>
+
+  <!-- ===================== BEHAVIORS (trouble only) ===================== -->
+  <section class="screen" id="behaviors">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_behaviors"></div><span style="width:46px"></span></div>
+    <div class="buddy"><span class="face" id="f_beh"></span><div class="bubble">It's okay. Tap what happened — we'll make it right together.</div></div>
+    <div class="grid" id="behGrid"></div>
+    <button class="cta" style="margin-top:18px" onclick="next()">Next ▸</button>
+  </section>
+
+  <!-- ===================== FEELINGS ===================== -->
+  <section class="screen" id="feelings">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_feelings"></div><span style="width:46px"></span></div>
+    <div class="buddy"><span class="face" id="f_feel"></span><div class="bubble">How are you feeling? Tap all that feel true.</div></div>
+    <div class="grid" id="feelGrid"></div>
+    <button class="cta" style="margin-top:18px" onclick="next()">Next ▸</button>
+  </section>
+
+  <!-- ===================== CALM DONE ===================== -->
+  <section class="screen" id="calmdone">
+    <div class="center celebrate">
+      <div class="em">🌟</div>
+      <h1 style="font-size:38px; color:var(--peach-d); text-align:center">You found your calm!</h1>
+      <p class="muted" style="font-size:18px">So proud of you. You earned a star ⭐</p>
+      <button class="cta mint" onclick="goHome()">Back home</button>
+    </div>
+  </section>
+
+  <!-- ===================== SUMMARY (trouble) ===================== -->
+  <section class="screen" id="summary">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_summary"></div><span style="width:46px"></span></div>
+    <div class="buddy"><span class="face" id="f_sum"></span><div class="bubble">Here's what happened. Now let's make it right. 💛</div></div>
+    <div class="card" id="sumCard"></div>
+    <button class="cta" style="margin-top:18px" onclick="next()">Make it right ▸</button>
+  </section>
+
+  <!-- ===================== CHOOSE CONSEQUENCE ===================== -->
+  <section class="screen" id="consequence">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_consequence"></div><span style="width:46px"></span></div>
+    <h2 style="font-size:28px; text-align:center; margin:6px 0 4px" id="restoreTitle">Make It Right</h2>
+    <p class="muted" style="margin-bottom:14px">Choose one. Finish all your steps and it becomes the smaller one 💛</p>
+    <div id="consChoices"></div>
+  </section>
+
+  <!-- ===================== RESTORATION PATH ===================== -->
+  <section class="screen" id="path">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><span class="starpill" id="pathStars">⭐ 0</span></div>
+    <div class="buddy"><span class="face" id="f_path"></span><div class="bubble">Four steps to make it right. You can do it!</div></div>
+    <div class="path" id="pathSteps"></div>
+  </section>
+
+  <!-- a sub-screen used by each restoration step -->
+  <section class="screen" id="step">
+    <div class="topbar"><button class="iconbtn" onclick="go('path')">◀</button><span class="starpill" id="stepStars">⭐ 0</span></div>
+    <div id="stepBody" style="flex:1; display:flex; flex-direction:column;"></div>
+  </section>
+
+  <!-- ===================== TROUBLE DONE ===================== -->
+  <section class="screen" id="troubledone">
+    <div class="center celebrate">
+      <div class="em">🌈</div>
+      <h1 style="font-size:34px; color:var(--peach-d); text-align:center">You made it right!</h1>
+      <p class="muted" id="doneStars" style="font-size:18px"></p>
+      <p class="note" id="doneNote"></p>
+      <button class="cta mint" onclick="goHome()">Back home</button>
+    </div>
+  </section>
+
+  <!-- ===================== PARENT ===================== -->
+  <section class="screen" id="parentgate">
+    <div class="topbar"><button class="iconbtn" onclick="goHome()">🏠</button><span></span><span style="width:46px"></span></div>
+    <div class="center">
+      <h2 style="font-size:26px">Parents only</h2>
+      <div class="pindots" id="pinDots"><i></i><i></i><i></i><i></i></div>
+      <div class="pinpad">
+        <button onclick="pinTap('1')">1</button><button onclick="pinTap('2')">2</button><button onclick="pinTap('3')">3</button>
+        <button onclick="pinTap('4')">4</button><button onclick="pinTap('5')">5</button><button onclick="pinTap('6')">6</button>
+        <button onclick="pinTap('7')">7</button><button onclick="pinTap('8')">8</button><button onclick="pinTap('9')">9</button>
+        <button onclick="pinDel()">⌫</button><button onclick="pinTap('0')">0</button><span></span>
+      </div>
+      <p class="muted" id="pinMsg">Enter your code</p>
+    </div>
+  </section>
+
+  <section class="screen" id="parent">
+    <div class="ptop"><h2 style="font-size:26px">Parent Hub</h2><button class="iconbtn" onclick="goHome()">🏠</button></div>
+    <div class="ptabs">
+      <button class="ptab on" data-pt="pending" onclick="parentTab('pending')">To check</button>
+      <button class="ptab" data-pt="cons" onclick="parentTab('cons')">Make-it-right</button>
+      <button class="ptab" data-pt="set" onclick="parentTab('set')">Settings</button>
+    </div>
+    <div id="ptBody" style="flex:1; overflow-y:auto;"></div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — quick edits here (also editable in Parent > Settings)
+   ============================================================ */
+const DEFAULTS = {
+  appName: "My Calm Place",
+  charName: "Pip",        // her companion character — rename this
+  currency: "Stars",
+  restoreLabel: "Make It Right",
+  pin: "1234",
+  voice: true,
+  voiceURI: ""
+};
+
+const COLORS = [
+  {key:"blue",   hex:"var(--c-blue)",   em:"💙"},
+  {key:"yellow", hex:"var(--c-yellow)", em:"💛"},
+  {key:"red",    hex:"var(--c-red)",    em:"❤️"},
+  {key:"green",  hex:"var(--c-green)",  em:"💚"},
+  {key:"purple", hex:"var(--c-purple)", em:"💜"},
+];
+
+const SMELLS = [["🌸","Flowers"],["🍪","Cookies"],["🌿","Fresh air"],["🧼","Soap"],["🍊","Orange"],["🍞","Bread"]];
+
+// ART: swap these emoji for your own icon images later
+const BEHAVIORS = [
+  ["😠","Yelling","yelling",2],["✋","Hitting","hitting",3],["🤥","Lying","lying",3],
+  ["🙉","Not listening","notlistening",1],["🫣","Hiding","hiding",1],["✊","Grabbing","grabbing",2],
+  ["💢","Mean words","meanwords",2],["🌀","Throwing","throwing",2]
+];
+const FEELINGS = [
+  ["😊","Happy"],["😡","Angry"],["😢","Sad"],["😨","Scared"],["😤","Frustrated"],
+  ["😳","Embarrassed"],["😴","Tired"],["😟","Worried"],["😌","Calm"]
+];
+
+// Make-it-right options (full → reduced). Edit in Settings later / expand the editor.
+const CONSEQUENCES = [
+  {em:"📱", ti:"No tablet today", full:"No tablet for the rest of today", reduced:"No tablet for 1 hour"},
+  {em:"🛏️", ti:"Early bedtime", full:"Bedtime 30 minutes early", reduced:"Bedtime 15 minutes early"},
+  {em:"🧹", ti:"Extra helper job", full:"Two helper jobs", reduced:"One small helper job"},
+];
+
+// Restoration exercises (later: AI-generated from behavior+feeling)
+const EXERCISES = [
+  ["🎨","Draw a happy picture for someone"],
+  ["🙆","Take 5 big stretches and wiggle it out"],
+  ["🧸","Hug your stuffed animal and whisper sorry"],
+  ["💧","Go get a cool drink of water"],
+  ["💛","Say one kind thing out loud"]
+];
+
+/* ============================================================ */
+const Store = {
+  k:p=>"cp_"+p,
+  get:(p,d)=>{try{const v=localStorage.getItem(Store.k(p));return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set:(p,v)=>localStorage.setItem(Store.k(p),JSON.stringify(v))
+};
+let settings = Object.assign({}, DEFAULTS, Store.get("settings",{}));
+function saveSettings(){Store.set("settings",settings);}
+
+/* ---- speech (picks the warmest voice the device has) ---- */
+let VOICES=[];
+const NICE=["samantha","karen","moira","tessa","fiona","serena","allison","ava","susan","zoe",
+            "google us english","google uk english female","jenny","aria","michelle","natural",
+            "flo","eddy","grandma","shelley","sandy","nicky","kathy"];
+function loadVoices(){
+  if(!('speechSynthesis'in window))return;
+  VOICES=speechSynthesis.getVoices()||[];
+  if(VOICES.length && !settings.voiceURI){ settings.voiceURI=pickDefaultVoice(); saveSettings(); }
+}
+function pickDefaultVoice(){
+  const en=VOICES.filter(v=>/^en/i.test(v.lang)); const pool=en.length?en:VOICES;
+  let best=pool.find(v=>NICE.some(n=>v.name.toLowerCase().includes(n)));
+  if(!best) best=pool.find(v=>/female/i.test(v.name));
+  if(!best) best=pool.find(v=>v.localService);
+  return (best||pool[0]||{}).voiceURI||"";
+}
+function currentVoice(){ return VOICES.find(v=>v.voiceURI===settings.voiceURI); }
+function say(t){
+  if(!settings.voice || !('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    const v=currentVoice(); if(v)u.voice=v;
+    u.rate=0.9; u.pitch=1.05;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+if('speechSynthesis'in window){ speechSynthesis.onvoiceschanged=loadVoices; loadVoices(); }
+
+/* ---- buddy face (placeholder SVG — replace with your art) ---- */
+function buddySVG(size){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" fill="none">
+    <ellipse cx="50" cy="92" rx="26" ry="5" fill="rgba(120,80,60,.12)"/>
+    <circle cx="50" cy="52" r="34" fill="#8FC0EE"/>
+    <circle cx="50" cy="52" r="34" fill="url(#g)" opacity=".25"/>
+    <ellipse cx="50" cy="60" rx="20" ry="17" fill="#EAF4FF"/>
+    <circle cx="38" cy="30" r="11" fill="#8FC0EE"/><circle cx="62" cy="30" r="11" fill="#8FC0EE"/>
+    <circle cx="38" cy="30" r="5" fill="#EAF4FF"/><circle cx="62" cy="30" r="5" fill="#EAF4FF"/>
+    <circle cx="41" cy="48" r="4.5" fill="#3A3A3A"/><circle cx="59" cy="48" r="4.5" fill="#3A3A3A"/>
+    <circle cx="42.5" cy="46.5" r="1.5" fill="#fff"/><circle cx="60.5" cy="46.5" r="1.5" fill="#fff"/>
+    <ellipse cx="32" cy="58" rx="5" ry="3" fill="#FFB4B4" opacity=".7"/><ellipse cx="68" cy="58" rx="5" ry="3" fill="#FFB4B4" opacity=".7"/>
+    <path d="M44 58 Q50 64 56 58" stroke="#3A3A3A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <defs><radialGradient id="g" cx=".4" cy=".3"><stop stop-color="#fff"/><stop offset="1" stop-color="#5B8FD6"/></radialGradient></defs>
+  </svg>`;
+}
+function paintBuddies(){
+  document.getElementById('homeBuddy').innerHTML = buddySVG(140);
+  ['f_colors','f_smell','f_count','f_beh','f_feel','f_sum','f_path'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML=buddySVG(58);
+  });
+}
+
+/* ---- colors scene (placeholder) ---- */
+function sceneSVG(){
+  // 5 findable objects, one per color, scattered in a friendly scene.
+  return `<svg viewBox="0 0 320 200">
+    <rect width="320" height="200" fill="#CFE9FF"/>
+    <circle cx="262" cy="44" r="26" fill="#FFC94D" class="findable" data-color="yellow"/>
+    <path d="M0 150 Q80 110 160 150 T320 150 V200 H0 Z" fill="#A8E0A0"/>
+    <rect x="150" y="120" width="12" height="40" fill="#9B6B43"/>
+    <circle cx="156" cy="112" r="26" fill="#5FBF77" class="findable" data-color="green"/>
+    <g class="findable" data-color="red"><circle cx="120" cy="150" r="13" fill="#FF6B6B"/><rect x="118" y="134" width="4" height="6" fill="#9B6B43"/></g>
+    <g class="findable" data-color="purple"><circle cx="60" cy="158" r="9" fill="#A77BD6"/><circle cx="52" cy="150" r="7" fill="#C49BE8"/><circle cx="68" cy="150" r="7" fill="#C49BE8"/><circle cx="60" cy="146" r="7" fill="#C49BE8"/></g>
+    <g class="findable" data-color="blue"><polygon points="240,150 252,165 240,180 228,165" fill="#5B8FD6"/><line x1="240" y1="180" x2="240" y2="196" stroke="#5B8FD6" stroke-width="2"/></g>
+  </svg>`;
+}
+
+/* ============================================================
+   FLOW ENGINE
+   ============================================================ */
+const FLOWS = {
+  calm:    ["colors","smell","count","breaths","feelings","calmdone"],
+  trouble: ["colors","smell","count","breaths","behaviors","feelings","summary","consequence","path"]
+};
+let state = {};
+function freshState(mode){
+  state = {mode, idx:0, found:[], smell:[], behaviors:[], feelings:[], consequence:null, steps:{}, sessionStars:0};
+}
+function startFlow(mode){
+  freshState(mode);
+  paintBuddies();
+  buildDots(); buildSmell(); buildGrids();
+  go(FLOWS[mode][0]); onEnter(FLOWS[mode][0]);
+}
+function next(){
+  const flow=FLOWS[state.mode]; state.idx++;
+  if(state.idx>=flow.length){goHome();return;}
+  const id=flow[state.idx]; go(id); onEnter(id);
+}
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s=>s.scrollTop=0);
+}
+function goHome(){ paintStars(); go('home'); }
+
+function buildDots(){
+  const flow=FLOWS[state.mode].filter(s=>!['calmdone','troubledone'].includes(s));
+  flow.forEach(id=>{
+    const c=document.getElementById('dots_'+id); if(!c)return; c.innerHTML='';
+    flow.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';c.appendChild(d);});
+  });
+}
+function markDots(id){
+  const flow=FLOWS[state.mode].filter(s=>!['calmdone','troubledone'].includes(s));
+  const pos=flow.indexOf(id);
+  const c=document.getElementById('dots_'+id); if(!c)return;
+  [...c.children].forEach((d,i)=>{d.className='dot'+(i<pos?' done':i===pos?' on':'');});
+}
+
+function onEnter(id){
+  markDots(id);
+  if(id==='colors') initColors();
+  if(id==='smell') say("What do you smell? Tap one, or draw it with your finger.");
+  if(id==='count') initCount();
+  if(id==='breaths') initBreaths();
+  if(id==='behaviors') say("It's okay. Tap what happened. We will make it right together.");
+  if(id==='feelings') say("How are you feeling? Tap all that feel true.");
+  if(id==='calmdone'){ award(1); say("You found your calm! So proud of you."); paintStars(); }
+  if(id==='summary') buildSummary();
+  if(id==='consequence') buildConsequences();
+  if(id==='path') buildPath();
+}
+
+/* ---------- COLORS ---------- */
+function initColors(){
+  state.found=[]; state.colorIdx=0;
+  document.getElementById('scene').innerHTML=sceneSVG();
+  const tray=document.getElementById('tray'); tray.innerHTML='';
+  COLORS.forEach(c=>{const s=document.createElement('div');s.className='swatch';s.id='sw_'+c.key;
+    s.style.background=c.hex; s.textContent=''; tray.appendChild(s);});
+  document.querySelectorAll('#scene .findable').forEach(o=>o.addEventListener('click',()=>tapColor(o)));
+  setColorTarget();
+}
+function setColorTarget(){
+  COLORS.forEach(c=>document.getElementById('sw_'+c.key).classList.remove('target'));
+  if(state.colorIdx>=COLORS.length){ say("You found all the colors! Rainbow!"); setTimeout(next,900); return; }
+  const c=COLORS[state.colorIdx];
+  document.getElementById('sw_'+c.key).classList.add('target');
+  document.getElementById('colorPrompt').innerHTML=`Can you find something <b style="color:${c.hex}">${c.key}</b>?`;
+  say("Can you find something "+c.key+"?");
+}
+function tapColor(o){
+  const tapped=o.dataset.color; const target=COLORS[state.colorIdx].key;
+  if(tapped===target){
+    const c=COLORS[state.colorIdx];
+    const sw=document.getElementById('sw_'+c.key); sw.classList.remove('target'); sw.classList.add('found'); sw.textContent='✓';
+    o.style.pointerEvents='none'; o.style.opacity='.35';
+    state.found.push(c.key); state.colorIdx++;
+    say("You found "+c.key+"!");
+    setColorTarget();
+  } else {
+    o.classList.add('wiggle'); setTimeout(()=>o.classList.remove('wiggle'),420);
+    say("That one is "+tapped+". Let's find "+target+".");
+  }
+}
+
+/* ---------- SMELL + DRAW ---------- */
+function buildSmell(){
+  const c=document.getElementById('smellChips'); c.innerHTML='';
+  SMELLS.forEach(([em,t])=>{const b=document.createElement('button');b.className='chip';b.innerHTML=em+' '+t;
+    b.onclick=()=>{b.classList.toggle('on'); if(b.classList.contains('on'))say(t);};c.appendChild(b);});
+}
+let pad,ctx,drawing=false;
+function setupPad(){
+  pad=document.getElementById('drawpad'); if(!pad)return;
+  const r=pad.getBoundingClientRect(); pad.width=r.width*2; pad.height=460;
+  ctx=pad.getContext('2d'); ctx.scale(2,2); ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.lineWidth=7; ctx.strokeStyle='#FF8E6B';
+  const pos=e=>{const b=pad.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-b.left,y:t.clientY-b.top};};
+  const start=e=>{drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();};
+  const move=e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();};
+  const end=()=>drawing=false;
+  pad.addEventListener('pointerdown',start);pad.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',end);
+}
+function clearPad(){if(ctx)ctx.clearRect(0,0,pad.width,pad.height);}
+
+/* ---------- COUNTDOWN ---------- */
+function initCount(){state.count=10;document.getElementById('bignum').textContent='10';
+  document.getElementById('countHint').textContent='Tap me! 👆';say("Let's count down from ten. Tap with me.");}
+function tapCount(){
+  const n=document.getElementById('bignum');
+  if(state.count>1){state.count--;n.textContent=state.count;say(String(state.count));
+    n.animate([{transform:'scale(1.2)'},{transform:'scale(1)'}],{duration:200});
+    if(state.count===1)document.getElementById('countHint').textContent='One more...';
+  } else {n.textContent='🎈';document.getElementById('countHint').textContent='All calm!';say("All calm!");setTimeout(next,800);}
+}
+
+/* ---------- BREATHS ---------- */
+function initBreaths(){
+  document.getElementById('orb').className='orb';
+  document.getElementById('orbWord').textContent='';
+  document.getElementById('breathLabel').textContent='Yahweh breaths';
+  document.getElementById('breathCount').textContent='5 slow breaths';
+  const b=document.getElementById('breathBtn'); b.style.display='block'; b.textContent="I'm ready ▸"; b.onclick=startBreaths;
+}
+function startBreaths(){
+  document.getElementById('breathBtn').style.display='none';
+  let n=0; const total=5; const orb=document.getElementById('orb'), word=document.getElementById('orbWord');
+  const label=document.getElementById('breathLabel'), count=document.getElementById('breathCount');
+  function cycle(){
+    if(n>=total){ label.textContent="Beautiful."; count.textContent="You did it 💛"; word.textContent='';
+      const b=document.getElementById('breathBtn'); b.style.display='block'; b.textContent='Next ▸'; b.onclick=next; say("Beautiful. You did it."); return; }
+    n++; count.textContent="Breath "+n+" of "+total;
+    label.textContent="Breathe in…"; word.style.opacity=1; word.textContent="yah";
+    orb.className='orb in'; say("Breathe in. Yah.");
+    setTimeout(()=>{ label.textContent="Breathe out…"; word.textContent="weh"; orb.className='orb out'; say("Breathe out. Weh."); },4200);
+    setTimeout(cycle,10600);
+  }
+  cycle();
+}
+
+/* ---------- GRIDS ---------- */
+function buildGrids(){
+  const bg=document.getElementById('behGrid'); bg.innerHTML='';
+  BEHAVIORS.forEach(([em,t,key,w])=>{const b=document.createElement('button');b.className='pick';b.dataset.key=key;b.dataset.w=w;
+    b.innerHTML=`<span class="em">${em}</span><span class="t">${t}</span>`;
+    b.onclick=()=>{b.classList.toggle('on');toggle(state.behaviors,key);if(b.classList.contains('on'))say(t);};bg.appendChild(b);});
+  const fg=document.getElementById('feelGrid'); fg.innerHTML='';
+  FEELINGS.forEach(([em,t])=>{const b=document.createElement('button');b.className='pick';
+    b.innerHTML=`<span class="em">${em}</span><span class="t">${t}</span>`;
+    b.onclick=()=>{b.classList.toggle('on');toggle(state.feelings,t);if(b.classList.contains('on'))say(t);};fg.appendChild(b);});
+}
+function toggle(arr,v){const i=arr.indexOf(v);i<0?arr.push(v):arr.splice(i,1);}
+
+/* ---------- SUMMARY ---------- */
+function buildSummary(){
+  const beh=state.behaviors.map(k=>{const f=BEHAVIORS.find(b=>b[2]===k);return f?f[0]+' '+f[1]:k;});
+  const feel=state.feelings;
+  document.getElementById('sumCard').innerHTML=
+    `<div style="font-weight:800;color:var(--ink-soft);margin-bottom:6px">What happened</div>
+     <div style="font-size:20px;font-weight:800;margin-bottom:14px">${beh.length?beh.join(' · '):'—'}</div>
+     <div style="font-weight:800;color:var(--ink-soft);margin-bottom:6px">How you felt</div>
+     <div style="font-size:20px;font-weight:800">${feel.length?feel.join(' · '):'—'}</div>`;
+  say("Here's what happened. Now let's make it right.");
+}
+
+/* ---------- CONSEQUENCES ---------- */
+function buildConsequences(){
+  document.getElementById('restoreTitle').textContent=settings.restoreLabel;
+  const wrap=document.getElementById('consChoices'); wrap.innerHTML='';
+  CONSEQUENCES.forEach((c,i)=>{const card=document.createElement('button');card.className='card choice';
+    card.innerHTML=`<span class="em">${c.em}</span><span><span class="ti">${c.ti}</span><br><span class="de">${c.full}</span></span>`;
+    card.onclick=()=>{state.consequence=c;next();};wrap.appendChild(card);});
+  say("Choose one. Finish all your steps and it becomes the smaller one.");
+}
+
+/* ---------- RESTORATION PATH ---------- */
+const STEPS=[
+  {key:"exercise",t:"Do an exercise",s:"A calming activity",offscreen:true},
+  {key:"story",   t:"Read a Bible story",s:"Learn a lesson",offscreen:false},
+  {key:"talk",    t:"Talk with your friend",s:"Share your feelings",offscreen:false},
+  {key:"parent",  t:"Tell a grown-up",s:"Share what you learned",offscreen:true},
+];
+function buildPath(){
+  document.getElementById('restoreTitle');
+  const wrap=document.getElementById('pathSteps'); wrap.innerHTML='';
+  STEPS.forEach((st,i)=>{
+    const done=state.steps[st.key];
+    const div=document.createElement('div');
+    div.className='step '+(done?'done':'');
+    const title = st.key==='talk' ? "Talk with "+settings.charName : st.t;
+    div.innerHTML=`<div class="num">${done?'✓':i+1}</div><div class="gr"><div class="t">${title}</div><div class="s">${done?'Done! ⭐':st.s}</div></div>`;
+    if(!done) div.onclick=()=>openStep(st.key);
+    wrap.appendChild(div);
+  });
+  paintStars();
+  // all four done?
+  if(STEPS.every(s=>state.steps[s.key])){ finishTrouble(); }
+}
+function openStep(key){
+  const body=document.getElementById('stepBody');
+  if(key==='exercise'){
+    const ex=EXERCISES[Math.floor(Math.random()*EXERCISES.length)];
+    body.innerHTML=`<div class="buddy"><span class="face">${buddySVG(58)}</span><div class="bubble">Here's your calming activity:</div></div>
+      <div class="center"><div style="font-size:80px">${ex[0]}</div><h2 style="font-size:28px;text-align:center">${ex[1]}</h2>
+      <p class="note">A grown-up will check this one ✓</p>
+      <button class="cta" onclick="finishStep('exercise',true)">I did it! ▸</button></div>`;
+    say(ex[1]);
+  }
+  if(key==='story'){ openStory(body); }
+  if(key==='talk'){ openTalk(body); }
+  if(key==='parent'){
+    body.innerHTML=`<div class="buddy"><span class="face">${buddySVG(58)}</span><div class="bubble">Go tell mom or dad what you learned today.</div></div>
+      <div class="center"><div style="font-size:80px">🫂</div><h2 style="font-size:26px;text-align:center">Talk to a grown-up about what you learned</h2>
+      <p class="note">When you talk together, a grown-up taps to finish ✓</p>
+      <button class="cta" onclick="finishStep('parent',true)">We talked! ▸</button></div>`;
+    say("Go tell mom or dad what you learned today.");
+  }
+  go('step'); paintStars();
+}
+
+// placeholder storybook (later: your picked story + your art, page by page)
+const SAMPLE_STORY=[
+  {pic:"📖",txt:"This is where your chosen Bible story will go — one page at a time."},
+  {pic:"🌟",txt:"Each page will have your picture and a few simple words "+settings.charName+" reads aloud."},
+  {pic:"💛",txt:"At the end, a gentle lesson — and a star for listening so well."}
+];
+function openStory(body){
+  let p=0; const story=SAMPLE_STORY;
+  function render(){
+    const pg=story[p];
+    body.innerHTML=`<div class="page"><div class="pic"><!-- ART: story page image -->${pg.pic}</div><div class="txt">${pg.txt}</div></div>
+      <div class="pagenav">${story.map((_,i)=>`<span class="pd ${i===p?'on':''}"></span>`).join('')}</div>
+      <button class="cta" style="margin-top:16px" id="storyBtn"></button>`;
+    const btn=document.getElementById('storyBtn');
+    btn.textContent = p<story.length-1?'Turn the page ▸':'Finish story ⭐';
+    btn.onclick = p<story.length-1?()=>{p++;render();}:()=>finishStep('story',false);
+    say(pg.txt);
+  }
+  render();
+}
+
+// placeholder character chat (later: real AI with child-safe guardrails)
+function openTalk(body){
+  body.innerHTML=`<div class="buddy"><span class="face">${buddySVG(58)}</span><div class="bubble">I'm here with you. Want to tell me what happened?</div></div>
+    <div class="chatlog" id="chatlog"></div>
+    <div class="replies" id="replies"></div>`;
+  const log=document.getElementById('chatlog'), rep=document.getElementById('replies');
+  const addMsg=(who,t)=>{const m=document.createElement('div');m.className='msg '+who;m.textContent=t;log.appendChild(m);log.scrollTop=log.scrollHeight;if(who==='b')say(t);};
+  addMsg('b',"It's okay to have big feelings. I have them too sometimes.");
+  const chips=["I was mad 😠","I'm sad 😢","I'm sorry 💛"];
+  const responses={
+    "I was mad 😠":"Being mad is okay. It's what we do with mad that matters. Next time, can we breathe first?",
+    "I'm sad 😢":"I'm sorry you feel sad. You are brave for telling me. God made your heart, and He loves it.",
+    "I'm sorry 💛":"That's a big, kind thing to say. Saying sorry helps fix things. I'm proud of you."
+  };
+  let turns=0;
+  chips.forEach(c=>{const b=document.createElement('button');b.className='chip';b.textContent=c;
+    b.onclick=()=>{addMsg('me',c);addMsg('b',responses[c]||"Thank you for sharing.");turns++;
+      if(turns>=2){rep.innerHTML='';const f=document.createElement('button');f.className='cta mint';f.textContent="Thanks for talking ⭐";f.onclick=()=>finishStep('talk',false);body.appendChild(f);} };rep.appendChild(b);});
+  setTimeout(()=>say("I'm here with you. Want to tell me what happened?"),300);
+}
+
+function finishStep(key,offscreen){
+  state.steps[key]=true;
+  if(offscreen){ // needs parent confirm → star pending
+    queuePending({type:'step',label:STEPS.find(s=>s.key===key).t,star:1});
+    toast("Saved! A grown-up will check it ✓");
+  } else {
+    award(1);
+  }
+  buildPath(); go('path');
+}
+
+function finishTrouble(){
+  // log the session for parents + queue behavior confirmation
+  const log=Store.get('log',[]);
+  log.unshift({when:Date.now(),behaviors:state.behaviors,feelings:state.feelings,
+    consequence:state.consequence?state.consequence.ti:null,reduced:false});
+  Store.set('log',log);
+  if(state.behaviors.length) queuePending({type:'behavior',label:'Confirm what happened',data:state.behaviors});
+  const earned=state.sessionStars;
+  const pend=Store.get('pending',[]).filter(p=>p.star).length;
+  document.getElementById('doneStars').textContent=`You earned ${earned} ⭐ right now`;
+  document.getElementById('doneNote').innerHTML= pend?`A few stars are waiting for a grown-up to check ✓ — finish those and your consequence becomes the smaller one 💛`:`💛`;
+  say("You made it right. So proud of you.");
+  go('troubledone');
+}
+
+/* ---------- stars ---------- */
+function award(n){ let s=Store.get('stars',0)+n; Store.set('stars',s); state.sessionStars+=n; paintStars(); }
+function paintStars(){
+  const s=Store.get('stars',0);
+  ['homeStars','pathStars','stepStars'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='⭐ '+s;});
+}
+function toast(t){say(t);}
+
+/* ---------- pending (parent confirm queue) ---------- */
+function queuePending(item){const p=Store.get('pending',[]);item.id=Date.now()+Math.random();item.when=Date.now();p.push(item);Store.set('pending',p);}
+
+/* ============================================================
+   PARENT
+   ============================================================ */
+let pinBuf="";
+function openParent(){ pinBuf=""; drawPin(); document.getElementById('pinMsg').textContent="Enter your code"; go('parentgate'); }
+function pinTap(d){ if(pinBuf.length>=4)return; pinBuf+=d; drawPin(); if(pinBuf.length===4)checkPin(); }
+function pinDel(){ pinBuf=pinBuf.slice(0,-1); drawPin(); }
+function drawPin(){ [...document.querySelectorAll('#pinDots i')].forEach((d,i)=>d.className=i<pinBuf.length?'f':''); }
+function checkPin(){
+  if(pinBuf===settings.pin){ go('parent'); parentTab('pending'); }
+  else { document.getElementById('pinMsg').textContent="Try again"; pinBuf=""; setTimeout(drawPin,300); }
+}
+function parentTab(t){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('on',b.dataset.pt===t));
+  const body=document.getElementById('ptBody');
+  if(t==='pending') body.innerHTML=renderPending();
+  if(t==='cons')    body.innerHTML=renderCons();
+  if(t==='set')     body.innerHTML=renderSettings();
+}
+function renderPending(){
+  const p=Store.get('pending',[]);
+  if(!p.length) return `<div class="empty">All caught up! 🌿<br>Things to check will show here when Zipporah finishes a step.</div>`;
+  return p.map(it=>{
+    let label=it.label;
+    if(it.type==='behavior'){const list=(it.data||[]).map(k=>{const f=BEHAVIORS.find(b=>b[2]===k);return f?f[1]:k;}).join(', ');label=`Confirm: ${list}`;}
+    return `<div class="pend"><span style="font-size:24px">${it.type==='behavior'?'📝':'✅'}</span>
+      <span style="font-weight:800">${label}</span>
+      <button class="ok" onclick="confirmPending('${it.id}')">Confirm</button></div>`;
+  }).join('');
+}
+function confirmPending(id){
+  let p=Store.get('pending',[]); const it=p.find(x=>String(x.id)===String(id));
+  if(it&&it.star){ Store.set('stars',Store.get('stars',0)+it.star); }
+  p=p.filter(x=>String(x.id)!==String(id)); Store.set('pending',p);
+  paintStars(); parentTab('pending');
+}
+function renderCons(){
+  return `<div class="note" style="margin-bottom:14px">These are the “${settings.restoreLabel}” options Zipporah chooses from. Full editor (per-behavior, severity weights) comes next — for now these are the defaults.</div>`+
+    CONSEQUENCES.map(c=>`<div class="card" style="margin-bottom:12px"><div style="font-weight:800;font-size:18px">${c.em} ${c.ti}</div>
+      <div class="de" style="color:var(--ink-soft);font-weight:700;margin-top:4px">Full: ${c.full}</div>
+      <div class="de" style="color:var(--mint-d);font-weight:700">Reduced: ${c.reduced}</div></div>`).join('');
+}
+function renderSettings(){
+  const s=settings;
+  setTimeout(()=>{
+    document.getElementById('voiceToggle')?.addEventListener('change',e=>{settings.voice=e.target.checked;saveSettings();});
+    document.getElementById('voiceSelect')?.addEventListener('change',e=>{settings.voiceURI=e.target.value;saveSettings();});
+  },0);
+  return `
+    <div class="field"><label>App name</label><input id="setApp" value="${s.appName}"></div>
+    <div class="field"><label>Character name</label><input id="setChar" value="${s.charName}"></div>
+    <div class="field"><label>Word for points</label><input id="setCur" value="${s.currency}"></div>
+    <div class="field"><label>“Make it right” label</label><input id="setRl" value="${s.restoreLabel}"></div>
+    <div class="field"><label>Parent code (4 digits)</label><input id="setPin" value="${s.pin}" maxlength="4" inputmode="numeric"></div>
+    <div class="field"><label><input type="checkbox" id="voiceToggle" ${s.voice?'checked':''}> Voice-over on</label></div>
+    <div class="field"><label>Voice</label>
+      <select id="voiceSelect" style="width:100%;padding:13px;border-radius:14px;border:2px solid var(--line);font-family:inherit;font-size:16px;font-weight:700;background:#fff">${voiceOptions()}</select>
+      <button class="cta small ghost" style="margin-top:8px" onclick="testVoice()">▶ Hear it</button>
+      <p class="muted" style="text-align:left;margin-top:8px;line-height:1.4">On iPad/iPhone you can download much warmer voices: <b>Settings → Accessibility → Spoken Content → Voices</b>, grab one (the “Enhanced/Premium” ones sound best), then pick it here.</p>
+    </div>
+    <button class="cta small" onclick="saveSettingsForm()">Save</button>
+    <button class="cta small ghost" style="margin-top:10px" onclick="if(confirm('Reset all stars, logs and settings?')){localStorage.clear();location.reload();}">Reset everything</button>
+    <p class="muted" style="margin-top:18px">Stars earned: ${Store.get('stars',0)} ⭐ · Sessions logged: ${Store.get('log',[]).length}</p>`;
+}
+function voiceOptions(){
+  if(!VOICES.length) loadVoices();
+  const en=VOICES.filter(v=>/^en/i.test(v.lang)); const pool=en.length?en:VOICES;
+  if(!pool.length) return '<option>Loading voices… tap “Hear it”, then reopen</option>';
+  return pool.map(v=>`<option value="${v.voiceURI}" ${v.voiceURI===settings.voiceURI?'selected':''}>${v.name}${/gb/i.test(v.lang)?' · UK':/au/i.test(v.lang)?' · AU':''}</option>`).join('');
+}
+function testVoice(){
+  const sel=document.getElementById('voiceSelect'); if(sel&&sel.value){settings.voiceURI=sel.value; saveSettings();}
+  const was=settings.voice; settings.voice=true; say("Hi! I'm here with you. Let's take a deep breath together. You are doing so well."); settings.voice=was;
+  setTimeout(()=>{ if(document.getElementById('parent').classList.contains('active')) parentTab('set'); },600);
+}
+function saveSettingsForm(){
+  settings.appName=val('setApp'); settings.charName=val('setChar'); settings.currency=val('setCur');
+  settings.restoreLabel=val('setRl'); settings.pin=val('setPin')||"1234"; saveSettings();
+  document.getElementById('appTitle').textContent=settings.appName;
+  alert('Saved! 💛'); parentTab('set');
+}
+function val(id){return document.getElementById(id).value.trim();}
+
+/* ---------- boot ---------- */
+function boot(){
+  document.getElementById('appTitle').textContent=settings.appName;
+  paintBuddies(); paintStars(); buildSmell(); buildGrids();
+  setTimeout(setupPad,300);
+  window.addEventListener('resize',()=>setTimeout(setupPad,200));
+}
+boot();
+</script>
+</body>
+</html>
