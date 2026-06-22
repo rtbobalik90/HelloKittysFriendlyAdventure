@@ -117,6 +117,24 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
 .smellBtns{display:flex; gap:9px; align-items:center;}
 .smellBtns .cta{width:auto; font-size:14px; padding:8px 16px; box-shadow:0 3px 8px rgba(80,60,40,.22);}
 .smellBtns .iconbtn{width:38px; height:38px; font-size:17px;}
+/* ---------- counting garden ---------- */
+#count.cgScreen{padding:0;}
+.cgBg{position:absolute; inset:0; z-index:0; background:#517F2F url('art/counting-garden-background.webp') top center / 100% auto no-repeat;}
+.cgSeam{position:absolute; left:0; right:0; top:calc(150vw - 7vw); height:14vw; z-index:1; pointer-events:none; background:linear-gradient(to bottom, rgba(0,0,0,0), #517F2F);}
+.cgTopCard{position:absolute; left:12.9vw; top:6.35vw; width:74.2vw; height:18.55vw; z-index:4; background:url('art/counting-top-card.webp') center/100% 100% no-repeat; display:flex; align-items:center; justify-content:center;}
+.cgTopT{font-family:'Baloo 2',system-ui,sans-serif; font-weight:800; font-size:5.2vw; color:#6B4FA0; padding:0 7vw; text-align:center; line-height:1.1;}
+#cgLayer{position:absolute; inset:0; z-index:3;}
+.cgFlower{position:absolute; border:none; background:transparent; padding:0; -webkit-tap-highlight-color:transparent; transition:opacity .3s ease;}
+.cgFlower img{width:100%; height:100%; display:block; pointer-events:none;}
+.cgFlower .cgNum{position:absolute; left:0; right:0; top:48%; transform:translateY(-50%); text-align:center; font-family:'Baloo 2',system-ui,sans-serif; font-weight:800; font-size:7vw; color:#5B3F86; text-shadow:0 1px 3px rgba(255,255,255,.8); pointer-events:none;}
+.cgFlower.on{cursor:pointer; animation:cgpulse 1.5s ease-in-out infinite; filter:drop-shadow(0 0 9px rgba(255,206,110,.95));}
+.cgFlower.done{opacity:.8;}
+@keyframes cgpulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.07);}}
+.cgHelper{position:absolute; left:19.7vw; top:133.8vw; width:60.5vw; height:10.74vw; z-index:4; background:url('art/counting-bottom-helper-card.webp') center/100% 100% no-repeat; display:flex; align-items:center; justify-content:center;}
+.cgHelperT{font-family:'Baloo 2',system-ui,sans-serif; font-weight:800; font-size:3.5vw; color:#6B4FA0;}
+.cgNav{position:absolute; left:0; right:0; bottom:max(14px,env(safe-area-inset-bottom)); z-index:6; display:flex; align-items:center; justify-content:center; gap:14px; padding:0 16px;}
+.cgNav .dots{justify-content:center;}
+.cgNav .dot{background:rgba(255,255,255,.55);} .cgNav .dot.on{background:#fff;} .cgNav .dot.done{background:rgba(255,255,255,.85);}
 
 /* ---------- COLORS GAME ---------- */
 .scene{width:100%; border-radius:24px; overflow:hidden; box-shadow:var(--shadow); border:4px solid #fff; background:#cfe9ff;}
@@ -314,14 +332,16 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
   </section>
 
   <!-- ===================== COUNTDOWN ===================== -->
-  <section class="screen kscreen" id="count">
-    <div class="ktop"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_count"></div></div>
-    <div class="kframe"><div class="kbg">
-      <img class="kbgimg" alt="">
-      <div class="kbubble"><span></span></div>
-      <div class="ksign"><button class="knum" id="bignum" onclick="tapCount()">10</button></div>
-      <div class="khint" id="countHint">Tap to count 👆</div>
-    </div></div>
+  <section class="screen cgScreen" id="count">
+    <div class="cgBg"></div>
+    <div class="cgSeam"></div>
+    <div class="cgTopCard"><span class="cgTopT">Count down with me.</span></div>
+    <div id="cgLayer"></div>
+    <div class="cgHelper"><span class="cgHelperT">Tap each flower slowly.</span></div>
+    <div class="cgNav">
+      <div class="dots" id="dots_count"></div>
+      <button class="iconbtn" onclick="goHome()">🏠</button>
+    </div>
   </section>
 
   <!-- ===================== BREATHS (signature) ===================== -->
@@ -569,8 +589,10 @@ const AUDIO=(()=>{
   const m={
     colors_done:"You found all the colors! Look, a rainbow!",
     smell_intro:"What do you smell? Draw it with your finger!",
-    count_intro:"Let's count down from ten. Tap the number with me.",
+    count_intro:"Count down with me. Tap each flower slowly.",
     count_done:"All calm! Great counting!",
+    count_1:"one",count_2:"two",count_3:"three",count_4:"four",count_5:"five",
+    count_6:"six",count_7:"seven",count_8:"eight",count_9:"nine",count_10:"ten",
     breath_in:"Breathe in. Yah.", breath_out:"Breathe out. Weh.", breath_done:"Beautiful. You did it.",
     behaviors_intro:"It's okay. Tap what happened. We will make it right together.",
     feelings_intro:"How are you feeling? Tap all the feelings that feel true.",
@@ -768,14 +790,46 @@ function setupPad(){
 function clearPad(){if(ctx)ctx.clearRect(0,0,pad.width,pad.height);}
 
 /* ---------- COUNTDOWN ---------- */
-function initCount(){ mountKFrame('count',"Count down from ten with me!"); state.count=10;document.getElementById('bignum').textContent='10';
-  document.getElementById('countHint').textContent='Tap to count 👆';play('count_intro');}
-function tapCount(){
-  const n=document.getElementById('bignum');
-  if(state.count>1){state.count--;n.textContent=state.count;play('count_'+state.count);
-    n.animate([{transform:'scale(1.2)'},{transform:'scale(1)'}],{duration:200});
-    if(state.count===1)document.getElementById('countHint').textContent='One more...';
-  } else {n.textContent='🎈';document.getElementById('countHint').textContent='All calm!';play('count_done');setTimeout(next,800);}
+const CG_W=1024, CG_H=1536, CG_FW=180;
+const CG_FLOWERS=[
+  {n:1,x:364,y:320},{n:2,x:202,y:452},{n:3,x:78,y:620},{n:4,x:135,y:840},{n:5,x:325,y:1000},
+  {n:6,x:552,y:1015},{n:7,x:760,y:845},{n:8,x:824,y:620},{n:9,x:764,y:450},{n:10,x:590,y:320}
+];
+function cgSrc(n,st){ return 'art/counting-flower-'+String(n).padStart(2,'0')+'-'+st+'.webp'; }
+function initCount(){
+  state.count=10;
+  const layer=document.getElementById('cgLayer'); if(!layer) return; layer.innerHTML='';
+  CG_FLOWERS.forEach(f=>{
+    const b=document.createElement('button'); b.className='cgFlower'; b.id='cgf'+f.n;
+    b.style.left=(f.x/CG_W*100)+'vw'; b.style.top=(f.y/CG_H*150)+'vw';
+    b.style.width=(CG_FW/CG_W*100)+'vw'; b.style.height=(CG_FW/CG_W*100)+'vw';
+    b.innerHTML='<img alt=""><span class="cgNum"></span>';
+    b.addEventListener('click',()=>tapCG(f.n));
+    layer.appendChild(b);
+  });
+  renderCount(); play('count_intro');
+}
+function renderCount(){
+  CG_FLOWERS.forEach(f=>{
+    const b=document.getElementById('cgf'+f.n); if(!b) return;
+    const img=b.querySelector('img'), num=b.querySelector('.cgNum');
+    const st = f.n>state.count ? 'complete' : (f.n===state.count ? 'active' : 'idle');
+    img.src=cgSrc(f.n,st);
+    b.classList.toggle('on', st==='active');
+    b.classList.toggle('done', st==='complete');
+    b.disabled = (st!=='active');
+    num.textContent = (st==='active') ? String(f.n) : '';
+  });
+}
+function tapCG(n){
+  if(n!==state.count) return;
+  play('count_'+n);
+  state.count--;
+  renderCount();
+  if(state.count<=0){
+    const h=document.querySelector('#count .cgHelperT'); if(h) h.textContent='All calm! 💛';
+    play('count_done'); setTimeout(next,900);
+  }
 }
 
 /* ---------- BREATHS ---------- */
