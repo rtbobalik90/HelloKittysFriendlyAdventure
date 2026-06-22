@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#FFF7F0" />
+<link rel="apple-touch-icon" href="art/app-icon.png" />
+<link rel="icon" type="image/png" href="art/app-icon.png" />
+<meta name="apple-mobile-web-app-title" content="My Calm Place" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <title>My Calm Place</title>
@@ -90,6 +93,16 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
 .door.calm{background:linear-gradient(135deg,#8FC0EE,#5B8FD6);}
 .door.trouble{background:linear-gradient(135deg,#F8C66E,#E89B33);}
 .homefoot{display:flex; align-items:center; justify-content:space-between; padding-top:6px;}
+/* ---------- home (image background + button graphics) ---------- */
+#home{padding:0;}
+.homeBg{position:absolute; inset:0; background-position:top center; background-size:cover; background-repeat:no-repeat;}
+.homeTop{position:absolute; left:0; right:0; top:max(12px,env(safe-area-inset-top)); display:flex; align-items:center; justify-content:space-between; padding:0 16px; z-index:3;}
+.homeTop .iconbtn{background:rgba(255,255,255,.82); box-shadow:0 2px 8px rgba(80,60,40,.18);}
+.homeButtons{position:absolute; left:0; right:0; bottom:max(28px,env(safe-area-inset-bottom)); display:flex; gap:14px; justify-content:center; align-items:stretch; padding:0 18px; z-index:3;}
+.homeBtn{flex:1 1 0; max-width:208px; height:auto; cursor:pointer; border-radius:22px; -webkit-tap-highlight-color:transparent; filter:drop-shadow(0 8px 16px rgba(80,60,40,.30)); transition:transform .12s ease;}
+.homeBtn:active{transform:translateY(3px) scale(.985);}
+.homeShelf{position:absolute; left:0; right:0; bottom:0; height:34%; z-index:1; pointer-events:none;
+  background:linear-gradient(to top, rgba(255,250,245,.94) 0%, rgba(255,250,245,.82) 38%, rgba(255,250,245,.40) 72%, rgba(255,250,245,0) 100%);}
 
 /* ---------- COLORS GAME ---------- */
 .scene{width:100%; border-radius:24px; overflow:hidden; box-shadow:var(--shadow); border:4px solid #fff; background:#cfe9ff;}
@@ -247,26 +260,15 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
 
   <!-- ===================== HOME ===================== -->
   <section class="screen active" id="home">
-    <div class="topbar"><span></span><span class="starpill" id="homeStars">⭐ 0</span></div>
-    <div class="hero">
-      <h1 id="appTitle">My Calm Place</h1>
-      <p>Hi, let's feel better together</p>
-      <!-- ART: drop her character here (replace this SVG buddy) -->
-      <div class="buddy-big" id="homeBuddy"></div>
-    </div>
-    <div class="doors">
-      <button class="door calm" onclick="startFlow('calm')">
-        <span class="em">☁️</span>
-        <span><span class="lbl">I need to calm down</span><br><span class="sub">Let's breathe and feel better</span></span>
-      </button>
-      <button class="door trouble" onclick="startFlow('trouble')">
-        <span class="em">🤍</span>
-        <span><span class="lbl">I got in trouble</span><br><span class="sub">Let's make it right</span></span>
-      </button>
-    </div>
-    <div class="homefoot">
-      <span class="muted">v1 · made with love</span>
+    <div class="homeBg" style="background-image:url('art/home-background.webp')"></div>
+    <div class="homeShelf"></div>
+    <div class="homeTop">
+      <span class="starpill" id="homeStars">⭐ 0</span>
       <button class="iconbtn" onclick="openParent()" title="Parents">⚙️</button>
+    </div>
+    <div class="homeButtons">
+      <img class="homeBtn" src="art/button-calm-down.webp" alt="I need to calm down" onclick="startFlow('calm')">
+      <img class="homeBtn" src="art/button-trouble.webp" alt="I got in trouble" onclick="startFlow('trouble')">
     </div>
   </section>
 
@@ -600,7 +602,7 @@ function buddySVG(size){
   </svg>`;
 }
 function paintBuddies(){
-  document.getElementById('homeBuddy').innerHTML = buddySVG(140);
+  {const hb=document.getElementById('homeBuddy'); if(hb) hb.innerHTML=buddySVG(140);}
   ['f_colors','f_smell','f_count','f_beh','f_feel','f_sum','f_path'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML=buddySVG(58);
   });
@@ -1016,7 +1018,7 @@ function testVoice(){
 function saveSettingsForm(){
   settings.appName=val('setApp'); settings.charName=val('setChar'); settings.currency=val('setCur');
   settings.restoreLabel=val('setRl'); settings.pin=val('setPin')||"1234"; saveSettings();
-  document.getElementById('appTitle').textContent=settings.appName;
+  {const at=document.getElementById('appTitle'); if(at) at.textContent=settings.appName;}
   alert('Saved! 💛'); parentTab('set');
 }
 function val(id){return document.getElementById(id).value.trim();}
@@ -1186,7 +1188,7 @@ function resetFrameEditor(){ if(confirm('Reset the layout to defaults?')){ saveF
 
 /* ---------- boot ---------- */
 function boot(){
-  document.getElementById('appTitle').textContent=settings.appName;
+  {const at=document.getElementById('appTitle'); if(at) at.textContent=settings.appName;}
   paintBuddies(); paintStars(); buildSmell(); buildGrids();
 }
 boot();
