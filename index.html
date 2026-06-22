@@ -470,7 +470,7 @@ function getUserScenes(){ return Store.get('userScenes',[]); }
 function saveUserScenes(a){ Store.set('userScenes',a); }
 function getScenes(){
   const pins=getPins();
-  const b=SCENES_BUILTIN.map(s=>({id:s.id,name:s.name,img:'art/'+s.id+'.png',hotspots:pins[s.id]||DEFAULT_HOTSPOTS,placed:!!pins[s.id],builtin:true}));
+  const b=SCENES_BUILTIN.map(s=>({id:s.id,name:s.name,img:'art/'+s.id+'.webp',hotspots:pins[s.id]||DEFAULT_HOTSPOTS,placed:!!pins[s.id],builtin:true}));
   const u=getUserScenes().map((s,i)=>({id:s.id,name:s.name,img:s.img,embed:s.embed,hotspots:s.hotspots,placed:true,builtin:false,uidx:i}));
   return b.concat(u);
 }
