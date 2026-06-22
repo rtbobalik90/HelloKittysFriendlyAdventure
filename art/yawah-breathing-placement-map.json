@@ -1,0 +1,43 @@
+{
+  "canvas": {
+    "width": 1024,
+    "height": 1536
+  },
+  "background": "yawah-breathing-background.webp",
+  "recommended_orb_positions": {
+    "inhale": {
+      "x": 512,
+      "y": 335,
+      "width": 500,
+      "height": 500
+    },
+    "exhale": {
+      "x": 512,
+      "y": 1160,
+      "width": 250,
+      "height": 250
+    }
+  },
+  "text_positions": {
+    "inhale_word": {
+      "x": 512,
+      "y": 315
+    },
+    "inhale_helper": {
+      "x": 512,
+      "y": 405
+    },
+    "exhale_word": {
+      "x": 512,
+      "y": 1138
+    },
+    "exhale_helper": {
+      "x": 512,
+      "y": 1210
+    },
+    "breath_count": {
+      "x": 512,
+      "y": 1480
+    }
+  }
+}
