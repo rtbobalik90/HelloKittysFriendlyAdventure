@@ -113,7 +113,10 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
 .swatches{display:flex; gap:11px; flex-wrap:wrap; justify-content:center; max-width:340px;}
 .swatch{width:40px; height:40px; border-radius:50%; border:3px solid #fff; box-shadow:0 2px 7px rgba(0,0,0,.3); cursor:pointer; padding:0; transition:transform .1s ease;}
 .swatch.sel{transform:scale(1.16); box-shadow:0 0 0 3px #fff,0 0 0 6px #7BD389;}
-.smellBtns{display:flex; gap:10px; align-items:center;}
+.smellQ{font-family:'Baloo 2',system-ui,sans-serif; font-weight:800; font-size:23px; color:#fff; text-align:center; text-shadow:0 2px 7px rgba(35,55,15,.6); margin:2px 0;}
+.smellBtns{display:flex; gap:9px; align-items:center;}
+.smellBtns .cta{width:auto; font-size:14px; padding:8px 16px; box-shadow:0 3px 8px rgba(80,60,40,.22);}
+.smellBtns .iconbtn{width:38px; height:38px; font-size:17px;}
 
 /* ---------- COLORS GAME ---------- */
 .scene{width:100%; border-radius:24px; overflow:hidden; box-shadow:var(--shadow); border:4px solid #fff; background:#cfe9ff;}
@@ -300,10 +303,11 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
     <canvas id="smellpad"></canvas>
     <div class="smellTools">
       <div class="dots" id="dots_smell"></div>
+      <div class="smellQ">What do you smell?</div>
       <div class="swatches" id="smellSwatches"></div>
       <div class="smellBtns">
         <button class="iconbtn" onclick="goHome()">🏠</button>
-        <button class="cta small ghost" onclick="clearPad()">Clear</button>
+        <button class="cta ghost" onclick="clearPad()">Clear</button>
         <button class="cta mint" onclick="next()">Done ▸</button>
       </div>
     </div>
