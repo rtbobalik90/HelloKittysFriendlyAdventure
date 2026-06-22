@@ -1,0 +1,123 @@
+{
+  "canvas": {
+    "width": 1024,
+    "height": 1536
+  },
+  "background": "counting-garden-background.webp",
+  "topCard": {
+    "asset": "counting-top-card.webp",
+    "x": 132,
+    "y": 65,
+    "width": 760,
+    "height": 190
+  },
+  "bottomCard": {
+    "asset": "counting-bottom-helper-card.webp",
+    "x": 202,
+    "y": 1370,
+    "width": 620,
+    "height": 110
+  },
+  "flowers": [
+    {
+      "number": 1,
+      "x": 364,
+      "y": 320,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-01-idle.webp",
+      "assetActive": "counting-flower-01-active.webp",
+      "assetComplete": "counting-flower-01-complete.webp"
+    },
+    {
+      "number": 2,
+      "x": 202,
+      "y": 452,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-02-idle.webp",
+      "assetActive": "counting-flower-02-active.webp",
+      "assetComplete": "counting-flower-02-complete.webp"
+    },
+    {
+      "number": 3,
+      "x": 78,
+      "y": 620,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-03-idle.webp",
+      "assetActive": "counting-flower-03-active.webp",
+      "assetComplete": "counting-flower-03-complete.webp"
+    },
+    {
+      "number": 4,
+      "x": 135,
+      "y": 840,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-04-idle.webp",
+      "assetActive": "counting-flower-04-active.webp",
+      "assetComplete": "counting-flower-04-complete.webp"
+    },
+    {
+      "number": 5,
+      "x": 325,
+      "y": 1000,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-05-idle.webp",
+      "assetActive": "counting-flower-05-active.webp",
+      "assetComplete": "counting-flower-05-complete.webp"
+    },
+    {
+      "number": 6,
+      "x": 552,
+      "y": 1015,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-06-idle.webp",
+      "assetActive": "counting-flower-06-active.webp",
+      "assetComplete": "counting-flower-06-complete.webp"
+    },
+    {
+      "number": 7,
+      "x": 760,
+      "y": 845,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-07-idle.webp",
+      "assetActive": "counting-flower-07-active.webp",
+      "assetComplete": "counting-flower-07-complete.webp"
+    },
+    {
+      "number": 8,
+      "x": 824,
+      "y": 620,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-08-idle.webp",
+      "assetActive": "counting-flower-08-active.webp",
+      "assetComplete": "counting-flower-08-complete.webp"
+    },
+    {
+      "number": 9,
+      "x": 764,
+      "y": 450,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-09-idle.webp",
+      "assetActive": "counting-flower-09-active.webp",
+      "assetComplete": "counting-flower-09-complete.webp"
+    },
+    {
+      "number": 10,
+      "x": 590,
+      "y": 320,
+      "width": 180,
+      "height": 180,
+      "assetIdle": "counting-flower-10-idle.webp",
+      "assetActive": "counting-flower-10-active.webp",
+      "assetComplete": "counting-flower-10-complete.webp"
+    }
+  ]
+}
