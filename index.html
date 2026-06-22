@@ -99,10 +99,8 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
 .homeTop{position:absolute; left:0; right:0; top:max(12px,env(safe-area-inset-top)); display:flex; align-items:center; justify-content:space-between; padding:0 16px; z-index:3;}
 .homeTop .iconbtn{background:rgba(255,255,255,.82); box-shadow:0 2px 8px rgba(80,60,40,.18);}
 .homeButtons{position:absolute; left:0; right:0; bottom:max(28px,env(safe-area-inset-bottom)); display:flex; gap:14px; justify-content:center; align-items:stretch; padding:0 18px; z-index:3;}
-.homeBtn{flex:1 1 0; max-width:208px; height:auto; cursor:pointer; border-radius:22px; -webkit-tap-highlight-color:transparent; filter:drop-shadow(0 8px 16px rgba(80,60,40,.30)); transition:transform .12s ease;}
+.homeBtn{flex:0 1 auto; width:35vw; max-width:166px; height:auto; cursor:pointer; border-radius:22px; -webkit-tap-highlight-color:transparent; filter:drop-shadow(0 8px 16px rgba(80,60,40,.30)); transition:transform .12s ease;}
 .homeBtn:active{transform:translateY(3px) scale(.985);}
-.homeShelf{position:absolute; left:0; right:0; bottom:0; height:34%; z-index:1; pointer-events:none;
-  background:linear-gradient(to top, rgba(255,250,245,.94) 0%, rgba(255,250,245,.82) 38%, rgba(255,250,245,.40) 72%, rgba(255,250,245,0) 100%);}
 
 /* ---------- COLORS GAME ---------- */
 .scene{width:100%; border-radius:24px; overflow:hidden; box-shadow:var(--shadow); border:4px solid #fff; background:#cfe9ff;}
@@ -261,7 +259,6 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
   <!-- ===================== HOME ===================== -->
   <section class="screen active" id="home">
     <div class="homeBg" style="background-image:url('art/home-background.webp')"></div>
-    <div class="homeShelf"></div>
     <div class="homeTop">
       <span class="starpill" id="homeStars">⭐ 0</span>
       <button class="iconbtn" onclick="openParent()" title="Parents">⚙️</button>
