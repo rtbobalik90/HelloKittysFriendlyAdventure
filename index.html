@@ -99,8 +99,35 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
 .homeTop{position:absolute; left:0; right:0; top:max(12px,env(safe-area-inset-top)); display:flex; align-items:center; justify-content:space-between; padding:0 16px; z-index:3;}
 .homeTop .iconbtn{background:rgba(255,255,255,.82); box-shadow:0 2px 8px rgba(80,60,40,.18);}
 .homeButtons{position:absolute; left:0; right:0; bottom:max(28px,env(safe-area-inset-bottom)); display:flex; gap:14px; justify-content:center; align-items:stretch; padding:0 18px; z-index:3;}
-.homeBtn{flex:0 1 auto; width:35vw; max-width:166px; height:auto; cursor:pointer; border-radius:22px; -webkit-tap-highlight-color:transparent; filter:drop-shadow(0 8px 16px rgba(80,60,40,.30)); transition:transform .12s ease;}
-.homeBtn:active{transform:translateY(3px) scale(.985);}
+.homeChoice{
+  flex:0 1 auto;
+  width:35vw;
+  max-width:166px;
+  padding:0;
+  border:0;
+  background:transparent;
+  border-radius:22px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  filter:drop-shadow(0 8px 16px rgba(80,60,40,.30));
+  transition:transform .12s ease, filter .18s ease;
+}
+.homeChoice:active,
+.homeChoice.isChoosing{
+  transform:translateY(3px) scale(.985);
+  filter:drop-shadow(0 5px 12px rgba(80,60,40,.25)) drop-shadow(0 0 10px rgba(255,255,255,.55));
+}
+.homeChoice:focus-visible{
+  outline:4px solid rgba(255,255,255,.95);
+  outline-offset:4px;
+}
+.homeBtn{
+  display:block;
+  width:100%;
+  height:auto;
+  border-radius:22px;
+  pointer-events:none;
+}
 /* ---------- smell (draw in the box + color picker) ---------- */
 #smell.smellScreen{padding:0;}
 .smellBg{position:absolute; inset:0; z-index:0; background:#517F2F url('art/draw-screen-with-text-box.webp') top center / 100% auto no-repeat;}
@@ -321,8 +348,12 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
       <button class="iconbtn" onclick="openParent()" title="Parents">⚙️</button>
     </div>
     <div class="homeButtons">
-      <img class="homeBtn" src="art/button-calm-down.webp" alt="I need to calm down" onclick="startFlow('calm')">
-      <img class="homeBtn" src="art/button-trouble.webp" alt="I got in trouble" onclick="startFlow('trouble')">
+      <button class="homeChoice" type="button" onclick="chooseHomePath('calm')" aria-label="I need to calm down. Let's breathe and feel better.">
+        <img class="homeBtn" src="art/button-calm-down.webp" alt="">
+      </button>
+      <button class="homeChoice" type="button" onclick="chooseHomePath('trouble')" aria-label="I got in trouble. Let's make it right.">
+        <img class="homeBtn" src="art/button-trouble.webp" alt="">
+      </button>
     </div>
   </section>
 
@@ -616,6 +647,9 @@ if('speechSynthesis'in window){ speechSynthesis.onvoiceschanged=loadVoices; load
 const AUDIO_DIR="audio/";
 const AUDIO=(()=>{
   const m={
+    home_welcome:"Welcome to My Calm Place. Do you need to calm down, or do you need to make something right?",
+    home_calm:"I need to calm down. Let's breathe and feel better.",
+    home_trouble:"I got in trouble. Let's make it right.",
     colors_done:"You found all the colors! Look, a rainbow!",
     smell_intro:"What do you smell? Draw it with your finger!",
     count_intro:"Count down with me. Tap each flower slowly.",
@@ -701,6 +735,18 @@ let state = {};
 function freshState(mode){
   state = {mode, idx:0, found:[], smell:[], behaviors:[], feelings:[], consequence:null, steps:{}, sessionStars:0};
 }
+function chooseHomePath(mode){
+  const key = mode === 'calm' ? 'home_calm' : 'home_trouble';
+  const btn = document.querySelector(`.homeChoice[onclick="chooseHomePath('${mode}')"]`);
+  if(btn) btn.classList.add('isChoosing');
+  play(key);
+
+  setTimeout(()=>{
+    if(btn) btn.classList.remove('isChoosing');
+    startFlow(mode);
+  }, 550);
+}
+
 function startFlow(mode){
   freshState(mode);
   paintBuddies();
@@ -717,7 +763,16 @@ function go(id){
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.screen').forEach(s=>s.scrollTop=0);
 }
-function goHome(){ paintStars(); go('home'); }
+function goHome(){
+  paintStars();
+  go('home');
+  enterHome(false);
+}
+
+function enterHome(shouldSpeak=true){
+  paintStars();
+  if(shouldSpeak) play('home_welcome');
+}
 
 function buildDots(){
   const flow=FLOWS[state.mode].filter(s=>!['calmdone','troubledone'].includes(s));
@@ -1335,6 +1390,7 @@ function resetFrameEditor(){ if(confirm('Reset the layout to defaults?')){ saveF
 function boot(){
   {const at=document.getElementById('appTitle'); if(at) at.textContent=settings.appName;}
   paintBuddies(); paintStars(); buildSmell(); buildGrids();
+  enterHome(false);
 }
 boot();
 </script>
