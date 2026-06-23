@@ -208,6 +208,9 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
   font-size:clamp(15px,2.6vh,22px); pointer-events:none;}
 .hotspot{position:absolute; transform:translate(-50%,-50%); aspect-ratio:1; border-radius:50%; background:transparent; border:none; padding:0;}
 .hotspot .spark{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:32px; animation:pop .4s;}
+.colorsRepeat{width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,.9); border:2px solid var(--line); font-size:21px; display:grid; place-items:center; box-shadow:var(--shadow);}
+.colorsRepeat:active{transform:scale(.96);}
+.colorsRepeat:focus-visible{outline:4px solid rgba(255,255,255,.95); outline-offset:3px;}
 /* ---- full-screen kitten frame ---- */
 .kscreen{padding:0 !important; overflow:hidden;}
 .ktop{position:absolute; top:max(10px,env(safe-area-inset-top)); left:0; right:0; z-index:7; display:flex; align-items:center; gap:10px; padding:6px 14px;}
@@ -359,7 +362,7 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; color:
 
   <!-- ===================== COLORS ===================== -->
   <section class="screen kscreen" id="colors">
-    <div class="ktop"><button class="iconbtn" onclick="goHome()">🏠</button><div class="dots" id="dots_colors"></div></div>
+    <div class="ktop"><button class="iconbtn" onclick="goHome()" aria-label="Go home">🏠</button><div class="dots" id="dots_colors"></div><button class="colorsRepeat" type="button" onclick="repeatCurrentColor()" aria-label="Hear the color again">🔊</button></div>
     <div class="kframe"><div class="kbg">
       <img class="kbgimg" id="colorsBg" alt="">
       <div class="kbubble"><span id="colorPrompt"></span></div>
@@ -647,10 +650,8 @@ if('speechSynthesis'in window){ speechSynthesis.onvoiceschanged=loadVoices; load
 const AUDIO_DIR="audio/";
 const AUDIO=(()=>{
   const m={
-    home_welcome:"Welcome to My Calm Place. Do you need to calm down, or do you need to make something right?",
-    home_calm:"I need to calm down. Let's breathe and feel better.",
-    home_trouble:"I got in trouble. Let's make it right.",
-    colors_done:"You found all the colors! Look, a rainbow!",
+    colors_intro:"Let's find colors together. Look at the picture and tap the color I ask for.",
+    colors_done:"You found all the colors. Beautiful noticing!",
     smell_intro:"What do you smell? Draw it with your finger!",
     count_intro:"Count down with me. Tap each flower slowly.",
     count_done:"All calm! Great counting!",
@@ -666,7 +667,7 @@ const AUDIO=(()=>{
   };
   COLORS.forEach(c=>{ m['find_'+c.key]="Can you find something "+c.key+"?";
     m['found_'+c.key]="You found "+c.key+"! Great job!";
-    m['look_'+c.key]="Hmm, not that one. Let's find something "+c.key+"."; });
+    m['look_'+c.key]="Good try. Look for something "+c.key+"."; });
   const w=["One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten"];
   for(let i=1;i<=10;i++) m['count_'+i]=w[i-1]+".";
   EXERCISES.forEach((e,i)=> m['exercise_'+(i+1)]=e[1]+".");
@@ -816,28 +817,50 @@ function initColors(){
   Object.entries(sc.hotspots).forEach(([color,xy])=>{
     const d=document.createElement('button'); d.className='hotspot'; d.dataset.color=color;
     d.style.left=xy[0]+'%'; d.style.top=xy[1]+'%'; d.style.width=xy[2]+'%';
+    d.setAttribute('aria-label','Tap the '+color+' thing');
     d.onclick=()=>tapColor(d); hs.appendChild(d);
   });
   const tray=document.getElementById('tray'); tray.innerHTML='';
-  COLORS.forEach(c=>{const s=document.createElement('div');s.className='swatch';s.id='sw_'+c.key;s.style.background=c.hex;tray.appendChild(s);});
-  setColorTarget();
+  COLORS.forEach(c=>{
+    const s=document.createElement('div');
+    s.className='swatch'; s.id='sw_'+c.key; s.style.background=c.hex;
+    s.setAttribute('aria-label',c.key);
+    tray.appendChild(s);
+  });
+  setColorTarget(false);
+  play('colors_intro');
+  setTimeout(()=>speakCurrentColor(),1600);
 }
-function setColorTarget(){
-  COLORS.forEach(c=>document.getElementById('sw_'+c.key).classList.remove('target'));
-  if(state.colorIdx>=COLORS.length){ play('colors_done'); setTimeout(next,900); return; }
+function currentColor(){ return COLORS[state.colorIdx]; }
+function speakCurrentColor(){
+  const c=currentColor();
+  if(c) play('find_'+c.key);
+}
+function repeatCurrentColor(){
+  speakCurrentColor();
+}
+function setColorTarget(speak=true){
+  COLORS.forEach(c=>{
+    const sw=document.getElementById('sw_'+c.key);
+    if(sw) sw.classList.remove('target');
+  });
+  if(state.colorIdx>=COLORS.length){ play('colors_done'); setTimeout(next,1100); return; }
   const c=COLORS[state.colorIdx];
-  document.getElementById('sw_'+c.key).classList.add('target');
+  const sw=document.getElementById('sw_'+c.key);
+  if(sw) sw.classList.add('target');
   document.getElementById('colorPrompt').innerHTML=`Can you find something <b style="color:${c.hex}">${c.key}</b>?`;
-  play('find_'+c.key);
+  if(speak) speakCurrentColor();
 }
 function tapColor(o){
   const tapped=o.dataset.color; const target=COLORS[state.colorIdx].key;
   if(tapped===target){
     const c=COLORS[state.colorIdx];
-    const sw=document.getElementById('sw_'+c.key); sw.classList.remove('target'); sw.classList.add('found'); sw.textContent='✓';
+    const sw=document.getElementById('sw_'+c.key);
+    sw.classList.remove('target'); sw.classList.add('found'); sw.textContent='✓';
     o.classList.add('hs-found'); o.style.pointerEvents='none'; o.innerHTML='<span class="spark">✨</span>';
     state.found.push(c.key); state.colorIdx++;
-    play('found_'+c.key); setColorTarget();
+    play('found_'+c.key);
+    setTimeout(()=>setColorTarget(true),850);
   } else {
     o.classList.add('wiggle'); setTimeout(()=>o.classList.remove('wiggle'),420);
     play('look_'+target);
